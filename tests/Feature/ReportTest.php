@@ -18,7 +18,7 @@ class ReportTest extends TestCase
      */
     public function testBasicTest()
     {
-        $response = $this->post('/api/v1/reports', [
+        $response = $this->put('api/reports', [
             'external_id' => 'ASV3455645FSAS',
             'title' => 'NEWS TITLE',
             'url' => 'http://www.test.com',

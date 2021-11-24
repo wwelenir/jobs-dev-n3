@@ -20,33 +20,41 @@ class ReportController extends Controller
      */
     public function listReports(Request $request)
     {
-        $apiUrl = 'https://spaceflightnewsapi.net/api/v2';
+        try {
+            $apiUrl = 'https://api.spaceflightnewsapi.net/v3/';
 
-        $guzzle = new Client([
-            'base_uri' => $apiUrl
-        ]);
-        $rawResult = $guzzle->get('reports')->getBody();
-
-        $filter = $request->get('filter');
-
-        $result = [];
-
-        for ($x = 0; $x <= sizeof($rawResult); $x++) {
-            Report::create([
-                'external_id' => $rawResult[$x]['id'],
-                'title' => $rawResult[$x]['title'],
-                'url' => $rawResult[$x]['url'],
-                'summary' => $rawResult[$x]['summary']
+            $guzzle = new Client([
+                'base_uri' => $apiUrl
             ]);
+            $rawResult = json_decode($guzzle->get('reports')->getBody(), true);
 
-            if (strpos($rawResult[$x], $filter) == false) {
-                continue;
+            $filter = $request->get('filter');
+
+            $result = [];
+
+            for ($x = 0; $x < sizeof($rawResult); $x++) {
+                $reports = Report::where('external_id', $rawResult[$x]['id'])->get();
+                if (count($reports) == 0) {
+                    Report::create([
+                        'external_id' => $rawResult[$x]['id'],
+                        'title' => $rawResult[$x]['title'],
+                        'url' => $rawResult[$x]['url'],
+                        'summary' => $rawResult[$x]['summary']
+                    ]);
+                }
+                $posTitle = !empty($filter) ? strpos($rawResult[$x]['title'], $filter) : FALSE;
+                $posSummary = !empty($filter) ? strpos($rawResult[$x]['summary'], $filter) : FALSE;
+                if ($posTitle === FALSE && $posSummary === FALSE) {
+                    continue;
+                }
+
+                $result[] = $rawResult[$x];
             }
 
-            $result[] = $rawResult[$x];
+            return response()->json(['data' => $result, "status" => "ok"]);
+        } catch (Exception $e) {
+            return response()->json(["status" => "error"]);
         }
-
-        return response()->json(['data' => $result]);
     }
 
     /**
@@ -74,6 +82,8 @@ class ReportController extends Controller
      */
     public function deleteReport($reportId)
     {
-        // Implementar esse endpoint.
+        $report = Report::find($reportId);
+        $report->delete();
+        return response()->json(["status" => "ok"]);
     }
 }

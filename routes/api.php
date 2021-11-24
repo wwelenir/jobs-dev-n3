@@ -4,10 +4,10 @@ use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 // Listar Reports
-Route::get('api/v1/reports', [ReportController::class, 'listReports'])->name('reports.list');
+Route::get('reports', [ReportController::class, 'listReports'])->name('reports.list');
 
 // Criar Reports
-Route::put('api/v1/reports', [ReportController::class, 'createReport'])->name('reports.create');
+Route::put('reports', [ReportController::class, 'createReport'])->name('reports.create');
 
 // Deletar Reports
-Route::post('api/v1/reports/{id}', [ReportController::class, 'deleteReport'])->name('reports.delete');
+Route::post('reports/{id}', [ReportController::class, 'deleteReport'])->name('reports.delete');
